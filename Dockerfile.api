@@ -1,0 +1,21 @@
+# Use official slim Python image — smaller than full image, faster deploys
+FROM python:3.11-slim
+
+# Set working directory inside the container
+WORKDIR /app
+
+# Copy requirements first — Docker caches this layer
+# If requirements.txt hasn't changed, Docker skips reinstalling packages
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY app/ ./app/
+COPY .env .
+
+# Expose the port uvicorn will listen on
+EXPOSE 8000
+
+# Run uvicorn with multiple workers for concurrency
+# --workers 2 means 2 parallel processes handling requests
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
